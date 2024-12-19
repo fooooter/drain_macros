@@ -15,7 +15,7 @@ pub fn drain_page(_attr: TokenStream, item: TokenStream) -> TokenStream {
 pub fn header(input: TokenStream) -> TokenStream {
     let in_str = input.to_string();
     let args_split = in_str.split_once(',').unwrap();
-    format!("response_headers.insert(String::from({}), String::from({}))",
+    format!("response_headers.insert({}.to_lowercase(), String::from({}))",
             args_split.0,
             args_split.1)
         .parse()

@@ -4,7 +4,10 @@ use proc_macro::TokenStream;
 pub fn drain_page(_attr: TokenStream, item: TokenStream) -> TokenStream {
     let item_str = item.to_string();
     let page_fn_split = item_str.split_once('(').unwrap();
-    format!("{}(request_data: RequestData, response_headers: &mut HashMap<String, String>, set_cookie: &mut HashMap<String, SetCookie>{}",
+    format!("{}(request_data: RequestData, \
+                request_headers: &HashMap<String, String>, \
+                response_headers: &mut HashMap<String, String>, \
+                set_cookie: &mut HashMap<String, SetCookie>{}",
             page_fn_split.0,
             page_fn_split.1)
         .parse()
@@ -12,12 +15,20 @@ pub fn drain_page(_attr: TokenStream, item: TokenStream) -> TokenStream {
 }
 
 #[proc_macro]
-pub fn header(input: TokenStream) -> TokenStream {
+pub fn set_header(input: TokenStream) -> TokenStream {
     let in_str = input.to_string();
     let args_split = in_str.split_once(',').unwrap();
     format!("response_headers.insert({}.to_lowercase(), String::from({}))",
             args_split.0,
             args_split.1)
+        .parse()
+        .unwrap()
+}
+
+#[proc_macro]
+pub fn header(input: TokenStream) -> TokenStream {
+    let in_str = input.to_string();
+    format!("request_headers.get({})", in_str)
         .parse()
         .unwrap()
 }

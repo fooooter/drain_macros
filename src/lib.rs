@@ -40,3 +40,10 @@ pub fn header(input: TokenStream) -> TokenStream {
         .parse()
         .unwrap()
 }
+
+#[proc_macro]
+pub fn cookies(_input: TokenStream) -> TokenStream {
+    "drain_common::cookies::cookies(headers)"
+        .parse()
+        .unwrap()
+}

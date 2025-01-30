@@ -18,19 +18,23 @@ pub fn drain_endpoint(attr: TokenStream, item: TokenStream) -> TokenStream {
         panic!("Endpoint's name must consist only of alphanumeric characters, hyphens, underscores, slashes and dots.");
     }
 
-    let attr_str_prepared = attr_str.trim_end_matches("/").replace("/", "::");
+    let attr_str_prepared = attr_str
+        .trim_end_matches(|x| x == '/' || x == '\\')
+        .replace(|x| x == '/' || x == '\\', "::");
 
     format!("#[export_name = \"{attr_str_prepared}\"]{}(request_data: drain_common::RequestData, \
                 request_headers: &std::collections::HashMap<String, String>, \
                 response_headers: &mut std::collections::HashMap<String, String>, \
-                set_cookie: &mut std::collections::HashMap<String, drain_common::cookies::SetCookie>) -> Option<Vec<u8>> {{\
-                    tokio::runtime::Builder::new_multi_thread()\
-                        .enable_all()\
-                        .build()\
-                        .unwrap()\
-                        .block_on(async {{\
-                            {page_fn_body}\
-                        )\
+                set_cookie: &mut std::collections::HashMap<String, drain_common::cookies::SetCookie>) -> Result<Option<Vec<u8>>, Box<dyn std::any::Any + Send>> {{\
+                    std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {{
+                        tokio::runtime::Builder::new_multi_thread()\
+                            .enable_all()\
+                            .build()\
+                            .unwrap()\
+                            .block_on(async {{\
+                                {page_fn_body}\
+                            )\
+                    }}))
                 }}",
             page_fn_split.0)
         .parse()

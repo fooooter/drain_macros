@@ -66,3 +66,34 @@ pub fn cookies(_input: TokenStream) -> TokenStream {
         .parse()
         .unwrap()
 }
+
+#[proc_macro]
+pub fn start_session(_input: TokenStream) -> TokenStream {
+    "drain_common::sessions::start_session(request_headers, set_cookie)"
+        .parse()
+        .unwrap()
+}
+
+#[proc_macro_derive(SessionValue)]
+pub fn derive_session_value(input: TokenStream) -> TokenStream {
+    let input_str = input.to_string();
+    let impl_decl = input_str
+        .trim_start_matches("pub")
+        .trim_start_matches("(crate)")
+        .trim_start_matches("(super)")
+        .split_once(|p| p == '{' || p == ';' || p == '(')
+        .unwrap().0
+        .trim()
+        .split_once(' ')
+        .unwrap();
+
+    if !impl_decl.0.eq("struct") && !impl_decl.0.eq("enum") {
+        panic!("Implementor of SessionValue must be either a struct or an enum.");
+    }
+
+    let impl_name = impl_decl.1;
+
+    format!("\nimpl SessionValue for {impl_name} {{ fn as_any(&self) -> &dyn std::any::Any {{ self }} }}")
+        .parse()
+        .unwrap()
+}

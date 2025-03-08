@@ -22,10 +22,10 @@ pub fn drain_endpoint(attr: TokenStream, item: TokenStream) -> TokenStream {
         .trim_end_matches(|x| x == '/' || x == '\\')
         .replace(|x| x == '/' || x == '\\', "::");
 
-    format!("#[export_name = \"{attr_str_prepared}\"]{}(request_data: drain_common::RequestData, \
-                request_headers: &std::collections::HashMap<String, String>, \
-                response_headers: &mut std::collections::HashMap<String, String>, \
-                set_cookie: &mut std::collections::HashMap<String, drain_common::cookies::SetCookie>) -> Result<Option<Vec<u8>>, Box<dyn std::any::Any + Send>> {{\
+    format!("#[unsafe(export_name = \"{attr_str_prepared}\")]{}(REQUEST_DATA: drain_common::RequestData, \
+                REQUEST_HEADERS: &std::collections::HashMap<String, String>, \
+                RESPONSE_HEADERS: &mut std::collections::HashMap<String, String>, \
+                SET_COOKIE: &mut std::collections::HashMap<String, drain_common::cookies::SetCookie>) -> Result<Option<Vec<u8>>, Box<dyn std::any::Any + Send>> {{\
                     std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {{
                         tokio::runtime::Builder::new_multi_thread()\
                             .enable_all()\
@@ -45,7 +45,7 @@ pub fn drain_endpoint(attr: TokenStream, item: TokenStream) -> TokenStream {
 pub fn set_header(input: TokenStream) -> TokenStream {
     let in_str = input.to_string();
     let args_split = in_str.split_once(',').unwrap();
-    format!("response_headers.insert({}.to_lowercase(), String::from({}))",
+    format!("RESPONSE_HEADERS.insert({}.to_lowercase(), String::from({}))",
             args_split.0,
             args_split.1)
         .parse()
@@ -55,21 +55,21 @@ pub fn set_header(input: TokenStream) -> TokenStream {
 #[proc_macro]
 pub fn header(input: TokenStream) -> TokenStream {
     let in_str = input.to_string();
-    format!("request_headers.get({})", in_str)
+    format!("REQUEST_HEADERS.get({})", in_str)
         .parse()
         .unwrap()
 }
 
 #[proc_macro]
 pub fn cookies(_input: TokenStream) -> TokenStream {
-    "drain_common::cookies::cookies(request_headers)"
+    "drain_common::cookies::cookies(REQUEST_HEADERS)"
         .parse()
         .unwrap()
 }
 
 #[proc_macro]
 pub fn start_session(_input: TokenStream) -> TokenStream {
-    "drain_common::sessions::start_session(request_headers, set_cookie)"
+    "drain_common::sessions::start_session(REQUEST_HEADERS, SET_COOKIE)"
         .parse()
         .unwrap()
 }

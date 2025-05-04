@@ -25,7 +25,8 @@ pub fn drain_endpoint(attr: TokenStream, item: TokenStream) -> TokenStream {
     format!("#[unsafe(export_name = \"{attr_str_prepared}\")]{}(REQUEST_DATA: drain_common::RequestData, \
                 REQUEST_HEADERS: &std::collections::HashMap<String, String>, \
                 RESPONSE_HEADERS: &mut std::collections::HashMap<String, String>, \
-                SET_COOKIE: &mut std::collections::HashMap<String, drain_common::cookies::SetCookie>) -> Result<Option<Vec<u8>>, Box<dyn std::any::Any + Send>> {{\
+                SET_COOKIE: &mut std::collections::HashMap<String, drain_common::cookies::SetCookie>,\
+                HTTP_STATUS_CODE: &mut u16) -> Result<Option<Vec<u8>>, Box<dyn std::any::Any + Send>> {{\
                     std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {{
                         tokio::runtime::Builder::new_multi_thread()\
                             .enable_all()\

@@ -27,6 +27,9 @@ pub fn drain_endpoint(attr: TokenStream, item: TokenStream) -> TokenStream {
                 RESPONSE_HEADERS: &mut std::collections::HashMap<String, String>, \
                 SET_COOKIE: &mut std::collections::HashMap<String, drain_common::cookies::SetCookie>,\
                 HTTP_STATUS_CODE: &mut u16,\
+                LOCAL_HOSTNAME: &String,\
+                LOCAL_IP: &std::net::IpAddr,\
+                LOCAL_PORT: &u16,\
                 REMOTE_IP: &std::net::IpAddr,\
                 REMOTE_PORT: &u16) -> Result<Option<Vec<u8>>, Box<dyn std::any::Any + Send>> {{\
                     std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {{
